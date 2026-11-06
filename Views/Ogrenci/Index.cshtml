@@ -1,69 +1,95 @@
+@model StajEvrakDogrulama.Models.Ogrenci
+
 @{
     ViewData["Title"] = "Öğrenci Paneli";
 }
 
-<div class="container mt-5">
-
-    <h2 class="mb-4">Öğrenci Paneli</h2>
-
-    <div class="card shadow p-4 mb-4">
-        <h4>Hoş geldiniz!</h4>
-        <p>
-            Staj Evrak Doğrulama ve Yönetim Sistemine
-            hoş geldiniz.
-        </p>
-    </div>
-
-    <div class="row">
-
-        <div class="col-md-6 mb-3">
-            <div class="card p-4 h-100">
-                <h5>📄 Evrak Yükle</h5>
-                <p>
-                    Ek-16 staj başvuru belgenizi
-                    sisteme yükleyebilirsiniz.
-                </p>
-            </div>
+<div class="container py-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h1 class="h3 mb-1">Öğrenci Paneli</h1>
+            <p class="text-muted mb-0">Staj belgelerin ve başvuruların</p>
         </div>
-
-        <div class="col-md-6 mb-3">
-            <div class="card p-4 h-100">
-                <h5>📊 Raporlarım</h5>
-                <p>
-                    Yüklediğiniz evrakların kontrol
-                    sonuçlarını görüntüleyebilirsiniz.
-                </p>
-            </div>
-        </div>
-
-        <div class="col-md-6 mb-3">
-            <div class="card p-4 h-100">
-                <h5>📅 Staj Günleri</h5>
-                <p>
-                    Staj yapacağınız günleri ve
-                    tarih aralığını seçebilirsiniz.
-                </p>
-            </div>
-        </div>
-
-        <div class="col-md-6 mb-3">
-            <div class="card p-4 h-100">
-                <h5>🔗 Google Form</h5>
-                <p>
-                    Staj evrağı teslim Google Form
-                    bağlantınızı girebilirsiniz.
-                </p>
-            </div>
-        </div>
-
-    </div>
-
-    <div class="mt-4">
         <a asp-controller="Giris"
            asp-action="Cikis"
-           class="btn btn-danger">
+           class="btn btn-outline-danger">
             Çıkış Yap
         </a>
     </div>
 
+    <div class="card shadow-sm mb-4">
+        <div class="card-body">
+            <h2 class="h5">Hoş geldin, @Model.AdSoyad</h2>
+            <p class="text-muted mb-0">
+                Öğrenci bilgilerin ve staj işlemlerin bu panelde yer alır.
+            </p>
+        </div>
+    </div>
+
+    <div class="card shadow-sm mb-4">
+        <div class="card-header bg-white">
+            <h2 class="h5 mb-0">Öğrenci Bilgilerim</h2>
+        </div>
+        <div class="card-body">
+            <dl class="row mb-0">
+                <dt class="col-sm-4">Öğrenci numarası</dt>
+                <dd class="col-sm-8">@Model.OgrenciNo</dd>
+
+                <dt class="col-sm-4">Bölüm</dt>
+                <dd class="col-sm-8">@Model.Bolum</dd>
+
+                <dt class="col-sm-4">E-posta</dt>
+                <dd class="col-sm-8">@Model.Eposta</dd>
+
+                <dt class="col-sm-4">Teslim yılı</dt>
+                <dd class="col-sm-8">@Model.TeslimYili</dd>
+
+                <dt class="col-sm-4">Önceki staj gün sayısı</dt>
+                <dd class="col-sm-8">@Model.OncekiStajGunSayisi</dd>
+            </dl>
+        </div>
+    </div>
+
+    <div class="row g-3">
+        <div class="col-md-6">
+            <div class="card h-100 shadow-sm">
+                <div class="card-body">
+                    <h2 class="h5">Ek-16 Belgesi</h2>
+                    <p class="text-muted">Staj başvuru belgesi yükleme alanı.</p>
+                    <button type="button" class="btn btn-primary" disabled>
+                        Belge yükle
+                    </button>
+                    <div class="form-text mt-2">
+                        Belge yükleme sonraki aşamada etkinleştirilecek.
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-6">
+            <div class="card h-100 shadow-sm">
+                <div class="card-body">
+                    <h2 class="h5">Kontrol Raporlarım</h2>
+                    <p class="text-muted">
+                        Yüklenen belgelerin kontrol sonuçları burada gösterilecek.
+                    </p>
+                    <span class="badge text-bg-secondary">Henüz rapor yok</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-6">
+            <div class="card h-100 shadow-sm">
+                <div class="card-body">
+                    <h2 class="h5">Staj Bilgileri</h2>
+                    <p class="text-muted">
+                        Staj tarihleri ve gün bilgileri bu alanda yer alacak.
+                    </p>
+                    <button type="button" class="btn btn-outline-primary" disabled>
+                        Bilgileri görüntüle
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
 </div>

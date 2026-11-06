@@ -1,69 +1,188 @@
+@model StajEvrakDogrulama.Models.AdminDashboardViewModel
+
 @{
-    ViewData["Title"] = "Admin Paneli";
+    ViewData["Title"] = "Yönetici Paneli";
 }
 
-<div class="container mt-5">
-
-    <h2 class="mb-4">Admin Paneli</h2>
-
-    <div class="card shadow p-4 mb-4">
-        <h4>Yönetici Ekranı</h4>
-        <p>
-            Staj Evrak Doğrulama ve Yönetim Sistemi
-            yönetici paneline hoş geldiniz.
-        </p>
-    </div>
-
-    <div class="row">
-
-        <div class="col-md-6 mb-3">
-            <div class="card p-4 h-100">
-                <h5>📁 Veri Seti Yükle</h5>
-                <p>
-                    Test amaçlı öğrenci veri setini
-                    sisteme yükleyebilirsiniz.
-                </p>
-            </div>
+<div class="container py-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h1 class="h3 mb-1">Yönetici Paneli</h1>
+            <p class="text-muted mb-0">Staj evrak ve öğrenci işlemleri</p>
         </div>
-
-        <div class="col-md-6 mb-3">
-            <div class="card p-4 h-100">
-                <h5>📄 Tüm Başvurular</h5>
-                <p>
-                    Öğrencilerin yüklediği staj
-                    başvurularını görüntüleyebilirsiniz.
-                </p>
-            </div>
-        </div>
-
-        <div class="col-md-6 mb-3">
-            <div class="card p-4 h-100">
-                <h5>✅ Tamamlanan Belgeler</h5>
-                <p>
-                    Tamamlanmış staj evraklarını
-                    inceleyebilirsiniz.
-                </p>
-            </div>
-        </div>
-
-        <div class="col-md-6 mb-3">
-            <div class="card p-4 h-100">
-                <h5>📑 Ek-17 Oluştur</h5>
-                <p>
-                    Tamamlanan başvurulardan
-                    Ek-17 belgesi oluşturabilirsiniz.
-                </p>
-            </div>
-        </div>
-
-    </div>
-
-    <div class="mt-4">
         <a asp-controller="Giris"
            asp-action="Cikis"
-           class="btn btn-danger">
+           class="btn btn-outline-danger">
             Çıkış Yap
         </a>
     </div>
 
+    <div class="row g-3 mb-4">
+        <div class="col-md-4">
+            <div class="card h-100 shadow-sm">
+                <div class="card-body">
+                    <p class="text-muted mb-1">Öğrenci İşlemleri</p>
+                    <h2 class="h5">Öğrenci Listesi</h2>
+                    <p class="mb-0">Aktarılan öğrenciler aşağıda listelenir.</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <div class="card h-100 shadow-sm">
+                <div class="card-body">
+                    <p class="text-muted mb-1">Veri Aktarımı</p>
+                    <h2 class="h5">Test Verisi Yükle</h2>
+                    <p class="mb-0">CSV veya Excel dosyasından öğrenci aktar.</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <div class="card h-100 shadow-sm">
+                <div class="card-body">
+                    <p class="text-muted mb-1">Belge Takibi</p>
+                    <h2 class="h5">Başvuru Durumları</h2>
+                    <p class="mb-0">Başvuru durumları sonraki aşamada eklenecek.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="card shadow-sm mb-4">
+        <div class="card-header bg-white">
+            <h2 class="h5 mb-0">Öğrenci Listesi (@Model.Students.Count)</h2>
+        </div>
+
+        <div class="card-body">
+            @if (Model.Students.Count == 0)
+            {
+                <p class="text-muted mb-0">Henüz aktarılmış öğrenci yok.</p>
+            }
+            else
+            {
+                <div class="table-responsive">
+                    <table class="table table-striped align-middle">
+                        <thead>
+                            <tr>
+                                <th>Ad Soyad</th>
+                                <th>Öğrenci No</th>
+                                <th>Bölüm</th>
+                                <th>Teslim Yılı</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var student in Model.Students)
+                            {
+                                <tr>
+                                    <td>@student.AdSoyad</td>
+                                    <td>@student.OgrenciNo</td>
+                                    <td>@student.Bolum</td>
+                                    <td>@student.TeslimYili</td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            }
+        </div>
+    </div>
+
+    <div class="card shadow-sm">
+        <div class="card-header bg-white">
+            <h2 class="h5 mb-0">Öğrenci veri seti</h2>
+        </div>
+
+        <div class="card-body">
+            <p class="text-muted">
+                CSV veya XLSX dosyası seçip öğrenci satırlarını aktar.
+            </p>
+
+            @if (ViewBag.UploadError is string uploadError)
+            {
+                <div class="alert alert-danger">@uploadError</div>
+            }
+
+            <form asp-controller="Yonetici"
+                  asp-action="Import"
+                  method="post"
+                  enctype="multipart/form-data">
+                <div class="mb-3">
+                    <label for="studentFile" class="form-label">Veri dosyası</label>
+                    <input id="studentFile"
+                           name="file"
+                           class="form-control"
+                           type="file"
+                           accept=".csv,.xlsx"
+                           required />
+                    <div class="form-text">
+                        En fazla 5 MB. CSV başlıkları şablondakiyle aynı olmalı.
+                    </div>
+                </div>
+
+                <button type="submit" class="btn btn-primary">
+                    Dosyayı yükle ve aktar
+                </button>
+
+                <a asp-controller="Yonetici"
+                   asp-action="CsvTemplate"
+                   class="btn btn-outline-secondary ms-2">
+                    CSV şablonunu indir
+                </a>
+            </form>
+
+            @if (ViewBag.ImportResult is StajEvrakDogrulama.Models.StudentImportResult result)
+            {
+                <hr />
+                <h3 class="h6">Aktarım sonucu</h3>
+                <p>
+                    Toplam satır: @result.TotalRows —
+                    Geçerli satır: @result.ValidRows
+                </p>
+
+                @if (result.Errors.Count > 0)
+                {
+                    <div class="alert alert-danger">
+                        Dosya aktarılmadı. Aşağıdaki hataları düzeltip yeniden yükle.
+                    </div>
+
+                    <ul class="text-danger">
+                        @foreach (var error in result.Errors)
+                        {
+                            <li>@error</li>
+                        }
+                    </ul>
+                }
+                else
+                {
+                    <div class="alert alert-success">
+                        Öğrenci hesapları oluşturuldu. Geçici parolaları şimdi kaydet;
+                        sayfadan ayrılınca tekrar gösterilmez.
+                    </div>
+
+                    <div class="table-responsive">
+                        <table class="table table-striped">
+                            <thead>
+                                <tr>
+                                    <th>Öğrenci No</th>
+                                    <th>Kullanıcı Adı</th>
+                                    <th>Geçici Parola</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var account in result.Accounts)
+                                {
+                                    <tr>
+                                        <td>@account.OgrenciNo</td>
+                                        <td>@account.KullaniciAdi</td>
+                                        <td><code>@account.TemporaryPassword</code></td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                }
+            }
+        </div>
+    </div>
 </div>

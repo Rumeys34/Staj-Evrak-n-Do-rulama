@@ -1,4 +1,4 @@
-
+using StajEvrakDogrulama.Services;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.EntityFrameworkCore;
 using StajEvrakDogrulama.Data;
@@ -10,6 +10,9 @@ builder.Services.AddDbContext<VeritabaniBaglami>(options =>
 
 // Add services to the container.
 builder.Services.AddControllersWithViews();
+builder.Services.AddScoped<IStudentImportParser, CsvStudentImportParser>();
+builder.Services.AddScoped<IStudentImportParser, ExcelStudentImportParser>();
+builder.Services.AddScoped<StudentImportService>();
 builder.Services.AddAuthentication(
     CookieAuthenticationDefaults.AuthenticationScheme)
     .AddCookie(options =>
