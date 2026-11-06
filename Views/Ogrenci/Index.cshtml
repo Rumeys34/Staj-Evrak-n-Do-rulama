@@ -1,0 +1,69 @@
+@{
+    ViewData["Title"] = "Öğrenci Paneli";
+}
+
+<div class="container mt-5">
+
+    <h2 class="mb-4">Öğrenci Paneli</h2>
+
+    <div class="card shadow p-4 mb-4">
+        <h4>Hoş geldiniz!</h4>
+        <p>
+            Staj Evrak Doğrulama ve Yönetim Sistemine
+            hoş geldiniz.
+        </p>
+    </div>
+
+    <div class="row">
+
+        <div class="col-md-6 mb-3">
+            <div class="card p-4 h-100">
+                <h5>📄 Evrak Yükle</h5>
+                <p>
+                    Ek-16 staj başvuru belgenizi
+                    sisteme yükleyebilirsiniz.
+                </p>
+            </div>
+        </div>
+
+        <div class="col-md-6 mb-3">
+            <div class="card p-4 h-100">
+                <h5>📊 Raporlarım</h5>
+                <p>
+                    Yüklediğiniz evrakların kontrol
+                    sonuçlarını görüntüleyebilirsiniz.
+                </p>
+            </div>
+        </div>
+
+        <div class="col-md-6 mb-3">
+            <div class="card p-4 h-100">
+                <h5>📅 Staj Günleri</h5>
+                <p>
+                    Staj yapacağınız günleri ve
+                    tarih aralığını seçebilirsiniz.
+                </p>
+            </div>
+        </div>
+
+        <div class="col-md-6 mb-3">
+            <div class="card p-4 h-100">
+                <h5>🔗 Google Form</h5>
+                <p>
+                    Staj evrağı teslim Google Form
+                    bağlantınızı girebilirsiniz.
+                </p>
+            </div>
+        </div>
+
+    </div>
+
+    <div class="mt-4">
+        <a asp-controller="Giris"
+           asp-action="Cikis"
+           class="btn btn-danger">
+            Çıkış Yap
+        </a>
+    </div>
+
+</div>

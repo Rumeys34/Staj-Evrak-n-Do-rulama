@@ -1,0 +1,18 @@
+# Build dosyaları
+bin/
+obj/
+
+# Veritabanı
+*.db
+*.db-shm
+*.db-wal
+
+# Geliştirme ayarları
+appsettings.Development.json
+
+# Mac dosyaları
+.DS_Store
+
+# IDE dosyaları
+.vs/
+.vscode/
