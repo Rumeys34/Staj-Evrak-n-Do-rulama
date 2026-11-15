@@ -17,5 +17,7 @@ namespace StajEvrakDogrulama.Data
         public DbSet<Ogrenci> Ogrenciler { get; set; }
 
         public DbSet<Yonetici> Yoneticiler { get; set; }
-    }
+
+        public DbSet<Ek16Belge> Ek16Belgeler { get; set; }
+    }   
 }

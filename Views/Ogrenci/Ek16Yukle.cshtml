@@ -1,0 +1,172 @@
+@model StajEvrakDogrulama.Models.Ek16Belge?
+
+@{
+    ViewData["Title"] = "Ek-16 Yükle";
+
+    var durumSinifi = Model?.Durum switch
+    {
+        "Onaylandı" => "bg-success",
+        "Hatalı/Eksik" => "bg-danger",
+        "Tamamlandı" => "bg-primary",
+        _ => "bg-warning text-dark"
+    };
+}
+
+<div class="container mt-4 mb-5">
+
+    <div class="row justify-content-center">
+
+        <div class="col-lg-9">
+
+            <h2 class="mb-3">
+                Ek-16 Staj Belgesi Yükle
+            </h2>
+
+            <p class="text-muted">
+                Staj başvuru süreciniz için Ek-16 belgenizi
+                aşağıdaki alandan yükleyebilirsiniz.
+            </p>
+
+            <div class="card shadow-sm mb-4">
+
+                <div class="card-header">
+                    <h3 class="h5 mb-0">
+                        Belge Yükleme
+                    </h3>
+                </div>
+
+                <div class="card-body">
+
+                    @if (TempData["Mesaj"] != null)
+                    {
+                        <div class="alert alert-success">
+                            @TempData["Mesaj"]
+                        </div>
+                    }
+
+                    @if (ViewBag.Hata != null)
+                    {
+                        <div class="alert alert-danger">
+                            @ViewBag.Hata
+                        </div>
+                    }
+
+                    @if (!ViewData.ModelState.IsValid)
+                    {
+                        <div class="alert alert-danger">
+
+                            @foreach (var hata in ViewData.ModelState.Values
+                                .SelectMany(x => x.Errors))
+                            {
+                                <div>
+                                    @hata.ErrorMessage
+                                </div>
+                            }
+
+                        </div>
+                    }
+
+                    <form asp-controller="Ogrenci"
+                          asp-action="Ek16Yukle"
+                          method="post"
+                          enctype="multipart/form-data">
+
+                        @Html.AntiForgeryToken()
+
+                        <div class="mb-3">
+
+                            <label for="dosya" class="form-label fw-bold">
+                                Ek-16 Dosyanızı Seçin
+                            </label>
+
+                            <input type="file"
+                                   id="dosya"
+                                   name="dosya"
+                                   class="form-control"
+                                   accept=".pdf,.doc,.docx,.jpg,.jpeg,.png"
+                                   required />
+
+                            <div class="form-text">
+                                İzin verilen formatlar:
+                                PDF, DOC, DOCX, JPG, JPEG ve PNG.
+                            </div>
+
+                        </div>
+
+                        <button type="submit"
+                                class="btn btn-primary">
+
+                            <i class="bi bi-upload"></i>
+                            Ek-16 Yükle
+
+                        </button>
+
+                    </form>
+
+                </div>
+            </div>
+
+            @if (Model != null)
+            {
+                <div class="card shadow-sm">
+
+                    <div class="card-header">
+                        <h3 class="h5 mb-0">
+                            Son Belge Kontrol Sonucu
+                        </h3>
+                    </div>
+
+                    <div class="card-body">
+
+                        <p>
+                            <strong>Dosya:</strong>
+                            @Model.DosyaAdi
+                        </p>
+
+                        <p>
+                            <strong>Dosya Türü:</strong>
+                            @Model.DosyaTuru.ToUpperInvariant()
+                        </p>
+
+                        <p>
+                            <strong>Yüklenme Tarihi:</strong>
+                            @Model.YuklenmeTarihi.ToString("dd.MM.yyyy HH:mm")
+                        </p>
+
+                        <p>
+                            <strong>Durum:</strong>
+
+                            <span class="badge @durumSinifi">
+                                @Model.Durum
+                            </span>
+                        </p>
+
+                        <hr />
+
+                        <h4 class="h6 mb-3">
+                            Kontrol Raporu
+                        </h4>
+
+                        @if (!string.IsNullOrWhiteSpace(Model.KontrolRaporu))
+                        {
+                            <div class="alert alert-info"
+                                 style="white-space: pre-line;">
+
+                                @Model.KontrolRaporu
+
+                            </div>
+                        }
+                        else
+                        {
+                            <div class="alert alert-secondary">
+                                Henüz kontrol raporu oluşturulmadı.
+                            </div>
+                        }
+
+                    </div>
+                </div>
+            }
+
+        </div>
+    </div>
+</div>

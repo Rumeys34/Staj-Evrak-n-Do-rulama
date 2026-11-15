@@ -1,3 +1,4 @@
+using System.Globalization;
 using ClosedXML.Excel;
 using StajEvrakDogrulama.Models;
 
@@ -7,67 +8,134 @@ public sealed class ExcelStudentImportParser : IStudentImportParser
 {
     public bool CanParse(string extension)
     {
-        return extension.Equals(".xlsx", StringComparison.OrdinalIgnoreCase);
+        return extension.Equals(
+            ".xlsx",
+            StringComparison.OrdinalIgnoreCase);
     }
 
     public IReadOnlyList<StudentImportRow> Parse(Stream stream)
     {
-        using var workbook = new XLWorkbook(stream);
+        using var workbook =
+            new XLWorkbook(stream);
 
-        var worksheet = workbook.Worksheets.FirstOrDefault();
+        var worksheet =
+            workbook.Worksheets.FirstOrDefault();
 
         if (worksheet is null)
-            throw new InvalidDataException("Excel dosyasında çalışma sayfası bulunamadı.");
+        {
+            throw new InvalidDataException(
+                "Excel dosyasında çalışma sayfası bulunamadı.");
+        }
 
-        var headerCells = worksheet.Row(1)
-            .CellsUsed()
-            .ToDictionary(
-                cell => cell.Address.ColumnNumber,
-                cell => cell.GetString().Trim());
+        var headerCells =
+            worksheet
+                .Row(1)
+                .CellsUsed()
+                .ToDictionary(
+                    cell => cell.Address.ColumnNumber,
+                    cell => cell.GetString().Trim());
 
-        var students = new List<StudentImportRow>();
+        var students =
+            new List<StudentImportRow>();
 
         foreach (var row in worksheet.RowsUsed().Skip(1))
         {
             string GetValue(string columnName)
             {
-                var header = headerCells.FirstOrDefault(
-                    item => item.Value.Equals(
-                        columnName,
-                        StringComparison.OrdinalIgnoreCase));
+                var header =
+                    headerCells.FirstOrDefault(
+                        item => item.Value.Equals(
+                            columnName,
+                            StringComparison.OrdinalIgnoreCase));
 
-                return header.Key == 0
-                    ? string.Empty
-                    : row.Cell(header.Key).GetFormattedString().Trim();
+                if (header.Key == 0)
+                {
+                    return string.Empty;
+                }
+
+                return row
+                    .Cell(header.Key)
+                    .GetFormattedString()
+                    .Trim();
             }
 
-            DateTime? birthDate = DateTime.TryParse(
-                GetValue("DogumTarihi"),
-                System.Globalization.CultureInfo.GetCultureInfo("tr-TR"),
-                System.Globalization.DateTimeStyles.None,
-                out var parsedDate)
-                    ? parsedDate
-                    : null;
+            DateTime? birthDate = null;
 
-            int.TryParse(GetValue("OncekiStajGunSayisi"), out var internshipDays);
+            var birthDateCell =
+                GetValue("DogumTarihi");
 
-            students.Add(new StudentImportRow
+            if (DateTime.TryParse(
+                    birthDateCell,
+                    CultureInfo.GetCultureInfo("tr-TR"),
+                    DateTimeStyles.None,
+                    out var parsedDate))
             {
-                RowNumber = row.RowNumber(),
-                AdSoyad = GetValue("AdSoyad"),
-                KullaniciAdi = GetValue("KullaniciAdi"),
-                Eposta = GetValue("Eposta"),
-                TcKimlikNo = GetValue("TcKimlikNo"),
-                OgrenciNo = GetValue("OgrenciNo"),
-                Bolum = GetValue("Bolum"),
-                TelefonNo = GetValue("TelefonNo"),
-                IkametgahAdresi = GetValue("IkametgahAdresi"),
-                DogumTarihi = birthDate,
-                TeslimYili = GetValue("TeslimYili"),
-                OncekiStajGunSayisi = internshipDays,
-                Uyruk = GetValue("Uyruk"),
-                SaglikYardimiDurumu = GetValue("SaglikYardimiDurumu")
-            });
+                birthDate = parsedDate;
+            }
+
+            var internshipDaysText =
+                GetValue("OncekiStajGunSayisi");
+
+            int internshipDays = 0;
+
+            if (!int.TryParse(
+                    internshipDaysText,
+                    NumberStyles.Integer,
+                    CultureInfo.InvariantCulture,
+                    out internshipDays))
+            {
+                int.TryParse(
+                    internshipDaysText,
+                    NumberStyles.Integer,
+                    CultureInfo.GetCultureInfo("tr-TR"),
+                    out internshipDays);
+            }
+
+            students.Add(
+                new StudentImportRow
+                {
+                    RowNumber =
+                        row.RowNumber(),
+
+                    AdSoyad =
+                        GetValue("AdSoyad"),
+
+                    KullaniciAdi =
+                        GetValue("KullaniciAdi"),
+
+                    Eposta =
+                        GetValue("Eposta"),
+
+                    TcKimlikNo =
+                        GetValue("TcKimlikNo"),
+
+                    OgrenciNo =
+                        GetValue("OgrenciNo"),
+
+                    Bolum =
+                        GetValue("Bolum"),
+
+                    TelefonNo =
+                        GetValue("TelefonNo"),
+
+                    IkametgahAdresi =
+                        GetValue("IkametgahAdresi"),
+
+                    DogumTarihi =
+                        birthDate,
+
+                    TeslimYili =
+                        GetValue("TeslimYili"),
+
+                    OncekiStajGunSayisi =
+                        internshipDays,
+
+                    Uyruk =
+                        GetValue("Uyruk"),
+
+                    SaglikYardimiDurumu =
+                        GetValue("SaglikYardimiDurumu")
+                });
         }
 
         return students;

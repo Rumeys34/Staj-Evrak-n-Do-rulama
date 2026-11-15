@@ -10,6 +10,7 @@
             <h1 class="h3 mb-1">Öğrenci Paneli</h1>
             <p class="text-muted mb-0">Staj belgelerin ve başvuruların</p>
         </div>
+
         <a asp-controller="Giris"
            asp-action="Cikis"
            class="btn btn-outline-danger">
@@ -20,6 +21,7 @@
     <div class="card shadow-sm mb-4">
         <div class="card-body">
             <h2 class="h5">Hoş geldin, @Model.AdSoyad</h2>
+
             <p class="text-muted mb-0">
                 Öğrenci bilgilerin ve staj işlemlerin bu panelde yer alır.
             </p>
@@ -30,8 +32,10 @@
         <div class="card-header bg-white">
             <h2 class="h5 mb-0">Öğrenci Bilgilerim</h2>
         </div>
+
         <div class="card-body">
             <dl class="row mb-0">
+
                 <dt class="col-sm-4">Öğrenci numarası</dt>
                 <dd class="col-sm-8">@Model.OgrenciNo</dd>
 
@@ -46,50 +50,77 @@
 
                 <dt class="col-sm-4">Önceki staj gün sayısı</dt>
                 <dd class="col-sm-8">@Model.OncekiStajGunSayisi</dd>
+
             </dl>
         </div>
     </div>
 
     <div class="row g-3">
+
+        <!-- EK-16 BELGESİ -->
         <div class="col-md-6">
             <div class="card h-100 shadow-sm">
                 <div class="card-body">
+
                     <h2 class="h5">Ek-16 Belgesi</h2>
-                    <p class="text-muted">Staj başvuru belgesi yükleme alanı.</p>
-                    <button type="button" class="btn btn-primary" disabled>
-                        Belge yükle
-                    </button>
+
+                    <p class="text-muted">
+                        Staj başvuru belgenizi yükleyebilir ve kontrol sürecini başlatabilirsiniz.
+                    </p>
+
+                    <a asp-controller="Ogrenci"
+                       asp-action="Ek16Yukle"
+                       class="btn btn-primary">
+                        Belge Yükle
+                    </a>
+
                     <div class="form-text mt-2">
-                        Belge yükleme sonraki aşamada etkinleştirilecek.
+                        PDF, Word veya resim formatındaki Ek-16 belgenizi yükleyebilirsiniz.
                     </div>
+
                 </div>
             </div>
         </div>
 
+        <!-- KONTROL RAPORLARI -->
         <div class="col-md-6">
             <div class="card h-100 shadow-sm">
                 <div class="card-body">
+
                     <h2 class="h5">Kontrol Raporlarım</h2>
+
                     <p class="text-muted">
                         Yüklenen belgelerin kontrol sonuçları burada gösterilecek.
                     </p>
-                    <span class="badge text-bg-secondary">Henüz rapor yok</span>
+
+                    <span class="badge text-bg-secondary">
+                        Henüz rapor yok
+                    </span>
+
                 </div>
             </div>
         </div>
 
+        <!-- STAJ BİLGİLERİ -->
         <div class="col-md-6">
             <div class="card h-100 shadow-sm">
                 <div class="card-body">
+
                     <h2 class="h5">Staj Bilgileri</h2>
+
                     <p class="text-muted">
                         Staj tarihleri ve gün bilgileri bu alanda yer alacak.
                     </p>
-                    <button type="button" class="btn btn-outline-primary" disabled>
+
+                    <button type="button"
+                            class="btn btn-outline-primary"
+                            disabled>
                         Bilgileri görüntüle
                     </button>
+
                 </div>
             </div>
         </div>
+
     </div>
 </div>

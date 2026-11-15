@@ -17,6 +17,70 @@ namespace StajEvrakDogrulama.Migrations
 #pragma warning disable 612, 618
             modelBuilder.HasAnnotation("ProductVersion", "10.0.14");
 
+            modelBuilder.Entity("StajEvrakDogrulama.Models.Ek16Belge", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER");
+
+                    b.Property<bool>("BosAlanKontrolu")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("DosyaAdi")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("DosyaTuru")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("DosyaYolu")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Durum")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<bool>("FormatKontrolu")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<bool>("IletisimBilgileriKontrolu")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<bool>("ImzaKontrolu")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<bool>("KaseKontrolu")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("KontrolRaporu")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<bool>("OgrenciBilgileriKontrolu")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("OgrenciId")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<bool>("StajGunKontrolu")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<bool>("TarihKontrolu")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<bool>("TcKimlikKontrolu")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<DateTime>("YuklenmeTarihi")
+                        .HasColumnType("TEXT");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Ek16Belgeler");
+                });
+
             modelBuilder.Entity("StajEvrakDogrulama.Models.User", b =>
                 {
                     b.Property<int>("Id")

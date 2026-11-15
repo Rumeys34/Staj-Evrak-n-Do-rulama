@@ -1,4 +1,5 @@
 using System.Globalization;
+using System.Text;
 using StajEvrakDogrulama.Models;
 
 namespace StajEvrakDogrulama.Services;
@@ -7,22 +8,30 @@ public sealed class CsvStudentImportParser : IStudentImportParser
 {
     public bool CanParse(string extension)
     {
-        return extension.Equals(".csv", StringComparison.OrdinalIgnoreCase);
+        return extension.Equals(
+            ".csv",
+            StringComparison.OrdinalIgnoreCase);
     }
 
     public IReadOnlyList<StudentImportRow> Parse(Stream stream)
     {
         using var reader = new StreamReader(
             stream,
-            System.Text.Encoding.UTF8,
+            Encoding.UTF8,
             detectEncodingFromByteOrderMarks: true,
             leaveOpen: true);
 
-        var lines = reader.ReadToEnd()
-            .Split(['\r', '\n'], StringSplitOptions.RemoveEmptyEntries);
+        var content = reader.ReadToEnd();
+
+        var lines = content
+            .Split(
+                ['\r', '\n'],
+                StringSplitOptions.RemoveEmptyEntries);
 
         if (lines.Length < 2)
+        {
             return [];
+        }
 
         var headers = SplitCsvLine(lines[0])
             .Select(header => header.Trim())
@@ -41,38 +50,90 @@ public sealed class CsvStudentImportParser : IStudentImportParser
                         columnName,
                         StringComparison.OrdinalIgnoreCase));
 
-                return index >= 0 && index < values.Count
-                    ? values[index].Trim()
-                    : string.Empty;
+                if (index < 0 || index >= values.Count)
+                {
+                    return string.Empty;
+                }
+
+                return values[index].Trim();
             }
 
-            DateTime? birthDate = DateTime.TryParse(
-                GetValue("DogumTarihi"),
-                CultureInfo.GetCultureInfo("tr-TR"),
-                DateTimeStyles.None,
-                out var parsedDate)
-                    ? parsedDate
-                    : null;
+            var dogumTarihiText =
+                GetValue("DogumTarihi");
 
-            int.TryParse(GetValue("OncekiStajGunSayisi"), out var internshipDays);
+            DateTime? birthDate = null;
 
-            students.Add(new StudentImportRow
+            if (DateTime.TryParse(
+                    dogumTarihiText,
+                    CultureInfo.GetCultureInfo("tr-TR"),
+                    DateTimeStyles.None,
+                    out var parsedDate))
             {
-                RowNumber = i + 1,
-                AdSoyad = GetValue("AdSoyad"),
-                KullaniciAdi = GetValue("KullaniciAdi"),
-                Eposta = GetValue("Eposta"),
-                TcKimlikNo = GetValue("TcKimlikNo"),
-                OgrenciNo = GetValue("OgrenciNo"),
-                Bolum = GetValue("Bolum"),
-                TelefonNo = GetValue("TelefonNo"),
-                IkametgahAdresi = GetValue("IkametgahAdresi"),
-                DogumTarihi = birthDate,
-                TeslimYili = GetValue("TeslimYili"),
-                OncekiStajGunSayisi = internshipDays,
-                Uyruk = GetValue("Uyruk"),
-                SaglikYardimiDurumu = GetValue("SaglikYardimiDurumu")
-            });
+                birthDate = parsedDate;
+            }
+
+            var stajGunText =
+                GetValue("OncekiStajGunSayisi");
+
+            int internshipDays = 0;
+
+            if (!int.TryParse(
+                    stajGunText,
+                    NumberStyles.Integer,
+                    CultureInfo.InvariantCulture,
+                    out internshipDays))
+            {
+                int.TryParse(
+                    stajGunText,
+                    NumberStyles.Integer,
+                    CultureInfo.GetCultureInfo("tr-TR"),
+                    out internshipDays);
+            }
+
+            students.Add(
+                new StudentImportRow
+                {
+                    RowNumber = i + 1,
+
+                    AdSoyad =
+                        GetValue("AdSoyad"),
+
+                    KullaniciAdi =
+                        GetValue("KullaniciAdi"),
+
+                    Eposta =
+                        GetValue("Eposta"),
+
+                    TcKimlikNo =
+                        GetValue("TcKimlikNo"),
+
+                    OgrenciNo =
+                        GetValue("OgrenciNo"),
+
+                    Bolum =
+                        GetValue("Bolum"),
+
+                    TelefonNo =
+                        GetValue("TelefonNo"),
+
+                    IkametgahAdresi =
+                        GetValue("IkametgahAdresi"),
+
+                    DogumTarihi =
+                        birthDate,
+
+                    TeslimYili =
+                        GetValue("TeslimYili"),
+
+                    OncekiStajGunSayisi =
+                        internshipDays,
+
+                    Uyruk =
+                        GetValue("Uyruk"),
+
+                    SaglikYardimiDurumu =
+                        GetValue("SaglikYardimiDurumu")
+                });
         }
 
         return students;
@@ -81,35 +142,51 @@ public sealed class CsvStudentImportParser : IStudentImportParser
     private static List<string> SplitCsvLine(string line)
     {
         var fields = new List<string>();
-        var currentField = new System.Text.StringBuilder();
+
+        var currentField =
+            new StringBuilder();
+
         var insideQuotes = false;
 
         for (var i = 0; i < line.Length; i++)
         {
             var character = line[i];
 
-            if (character == '"' && insideQuotes &&
-                i + 1 < line.Length && line[i + 1] == '"')
+            if (character == '"' &&
+                insideQuotes &&
+                i + 1 < line.Length &&
+                line[i + 1] == '"')
             {
                 currentField.Append('"');
                 i++;
+
+                continue;
             }
-            else if (character == '"')
+
+            if (character == '"')
             {
                 insideQuotes = !insideQuotes;
+
+                continue;
             }
-            else if (character == ',' && !insideQuotes)
+
+            if (character == ',' &&
+                !insideQuotes)
             {
-                fields.Add(currentField.ToString());
+                fields.Add(
+                    currentField.ToString());
+
                 currentField.Clear();
+
+                continue;
             }
-            else
-            {
-                currentField.Append(character);
-            }
+
+            currentField.Append(character);
         }
 
-        fields.Add(currentField.ToString());
+        fields.Add(
+            currentField.ToString());
+
         return fields;
     }
 }

@@ -6,12 +6,16 @@ public sealed class StudentImportResult
     private readonly List<ImportedStudentAccount> _accounts = [];
 
     public int TotalRows { get; private set; }
+
     public int ValidRows { get; private set; }
 
     public IReadOnlyList<string> Errors => _errors;
+
     public IReadOnlyList<ImportedStudentAccount> Accounts => _accounts;
 
-    public bool IsValid => TotalRows > 0 && _errors.Count == 0;
+    public bool IsValid =>
+        TotalRows > 0 &&
+        _errors.Count == 0;
 
     internal void SetTotalRows(int count)
     {
@@ -28,7 +32,8 @@ public sealed class StudentImportResult
         _errors.Add(message);
     }
 
-    internal void AddAccount(ImportedStudentAccount account)
+    internal void AddAccount(
+        ImportedStudentAccount account)
     {
         _accounts.Add(account);
     }

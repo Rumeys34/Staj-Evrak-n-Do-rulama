@@ -2,17 +2,25 @@ using StajEvrakDogrulama.Services;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.EntityFrameworkCore;
 using StajEvrakDogrulama.Data;
+using StajEvrakDogrulama.Models;
+using StajEvrakDogrulama.Yardimcilar;
 
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddDbContext<VeritabaniBaglami>(options =>
     options.UseSqlite("Data Source=StajEvrakDogrulama.db"));
 
-// Add services to the container.
 builder.Services.AddControllersWithViews();
+
+// Öğrenci veri seti içe aktarma servisleri
 builder.Services.AddScoped<IStudentImportParser, CsvStudentImportParser>();
 builder.Services.AddScoped<IStudentImportParser, ExcelStudentImportParser>();
 builder.Services.AddScoped<StudentImportService>();
+
+// Ek-16 kontrol servisi
+builder.Services.AddScoped<Ek16KontrolService>();
+
+// Kimlik doğrulama
 builder.Services.AddAuthentication(
     CookieAuthenticationDefaults.AuthenticationScheme)
     .AddCookie(options =>
@@ -24,16 +32,16 @@ builder.Services.AddAuthentication(
 
 var app = builder.Build();
 
-// Configure the HTTP request pipeline.
 if (!app.Environment.IsDevelopment())
 {
     app.UseExceptionHandler("/Home/Error");
-    // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
     app.UseHsts();
 }
 
 app.UseHttpsRedirection();
+
 app.UseRouting();
+
 app.UseAuthentication();
 app.UseAuthorization();
 
@@ -44,5 +52,35 @@ app.MapControllerRoute(
     pattern: "{controller=Home}/{action=Index}/{id?}")
     .WithStaticAssets();
 
+
+// ---------------------------------------------------------
+// SİSTEM BAŞLANGIÇ İŞLEMLERİ
+// ---------------------------------------------------------
+using (var scope = app.Services.CreateScope())
+{
+    var db = scope.ServiceProvider
+        .GetRequiredService<VeritabaniBaglami>();
+
+    // Admin hesabı yoksa oluştur.
+    // Öğrenci bilgileri burada oluşturulmaz veya değiştirilmez.
+    var adminExists = await db.Kullanicilar
+        .AnyAsync(x => x.KullaniciAdi == "admin");
+
+    if (!adminExists)
+    {
+        var admin = new User
+        {
+            AdSoyad = "Sistem Yöneticisi",
+            KullaniciAdi = "admin",
+            Eposta = "admin@test.com",
+            SifreHash = SifreYardimcisi.SifreyiHashle("Admin123!"),
+            Rol = "ROLE_ADMIN"
+        };
+
+        db.Kullanicilar.Add(admin);
+
+        await db.SaveChangesAsync();
+    }
+}
 
 app.Run();
