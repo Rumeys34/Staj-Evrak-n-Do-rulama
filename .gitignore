@@ -16,3 +16,11 @@ appsettings.Development.json
 # IDE dosyaları
 .vs/
 .vscode/
+
+# Veritabanı dosyaları
+*.db
+*.sqlite
+*.sqlite3
+
+# Öğrenci belgeleri ve yüklenen dosyalar
+wwwroot/uploads/
