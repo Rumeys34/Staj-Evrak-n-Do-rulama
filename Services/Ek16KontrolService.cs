@@ -1,3 +1,5 @@
+using TesseractOCR;
+using TesseractOCR.Enums;
 using System.Globalization;
 using System.Text;
 using System.Text.RegularExpressions;
@@ -5,6 +7,7 @@ using Microsoft.EntityFrameworkCore;
 using StajEvrakDogrulama.Data;
 using StajEvrakDogrulama.Models;
 using UglyToad.PdfPig;
+using DocumentFormat.OpenXml.Packaging;
 
 namespace StajEvrakDogrulama.Services
 {
@@ -102,21 +105,28 @@ namespace StajEvrakDogrulama.Services
 
             if (!belge.DosyaTuru.Equals(
                     ".pdf",
+                    StringComparison.OrdinalIgnoreCase) &&
+                    !belge.DosyaTuru.Equals(
+                    ".docx",
+                    StringComparison.OrdinalIgnoreCase)
+                && !belge.DosyaTuru.Equals(
+                    ".jpg",
+                    StringComparison.OrdinalIgnoreCase)
+                && !belge.DosyaTuru.Equals(
+                    ".jpeg",
+                    StringComparison.OrdinalIgnoreCase)
+                && !belge.DosyaTuru.Equals(
+                    ".png",
                     StringComparison.OrdinalIgnoreCase))
             {
                 rapor.Add(
-                    "Dosya formatı kabul edildi ancak Word ve resim " +
-                    "dosyalarının içerik analizi henüz uygulanmadı.");
+                    "İçerik analizi şu an PDF ve DOCX dosyaları için destekleniyor.");
 
                 belge.Durum = "İnceleniyor";
-
                 belge.KontrolRaporu =
-                    string.Join(
-                        Environment.NewLine,
-                        rapor);
+                    string.Join(Environment.NewLine, rapor);
 
                 await _db.SaveChangesAsync();
-
                 return;
             }
 
@@ -167,7 +177,15 @@ namespace StajEvrakDogrulama.Services
             try
             {
                 hamMetin =
-                    PdfMetniniOku(fizikselYol);
+                    belge.DosyaTuru.Equals(
+                        ".pdf",
+                        StringComparison.OrdinalIgnoreCase)
+                        ? PdfMetniniOku(fizikselYol)
+                        : belge.DosyaTuru.Equals(
+                            ".docx",
+                            StringComparison.OrdinalIgnoreCase)
+                            ? DocxMetniniOku(fizikselYol)
+                            : ResimMetniniOku(fizikselYol);
             }
             catch
             {
@@ -211,7 +229,7 @@ namespace StajEvrakDogrulama.Services
                 AramaMetnineDonustur(hamMetin);
 
             rapor.Add(
-                "PDF metni başarıyla okundu.");
+                "Belge metni başarıyla okundu.");
 
             // =====================================================
             // 6. AD SOYAD
@@ -234,7 +252,7 @@ namespace StajEvrakDogrulama.Services
                 adSoyadEslesiyor
                     ? "Ad Soyad bilgisi bulundu ve eşleşiyor."
                     : $"Ad Soyad bulunamadı veya eşleşmiyor. " +
-                      $"PDF: '{pdfAdSoyad}' | " +
+                      $"Belge: '{pdfAdSoyad}' | " +
                       $"Veritabanı: '{ogrenci.AdSoyad}'");
 
             // =====================================================
@@ -258,7 +276,7 @@ namespace StajEvrakDogrulama.Services
                 ogrenciNoEslesiyor
                     ? "Öğrenci numarası bulundu ve eşleşiyor."
                     : $"Öğrenci numarası bulunamadı veya eşleşmiyor. " +
-                      $"PDF: '{pdfOgrenciNo}' | " +
+                      $"Belge: '{pdfOgrenciNo}' | " +
                       $"Veritabanı: '{ogrenci.OgrenciNo}'");
 
             belge.OgrenciBilgileriKontrolu =
@@ -289,7 +307,7 @@ namespace StajEvrakDogrulama.Services
                 tcEslesiyor
                     ? "TC Kimlik Numarası bulundu ve eşleşiyor."
                     : $"TC Kimlik Numarası bulunamadı veya eşleşmiyor. " +
-                      $"PDF: '{pdfTc}' | " +
+                      $"Belge: '{pdfTc}' | " +
                       $"Veritabanı: '{ogrenci.TcKimlikNo}'");
 
             // =====================================================
@@ -311,7 +329,7 @@ namespace StajEvrakDogrulama.Services
                 epostaEslesiyor
                     ? "E-posta adresi bulundu ve eşleşiyor."
                     : $"E-posta bulunamadı veya eşleşmiyor. " +
-                      $"PDF: '{pdfEposta}' | " +
+                      $"Belge: '{pdfEposta}' | " +
                       $"Veritabanı: '{ogrenci.Eposta}'");
 
             // =====================================================
@@ -333,7 +351,7 @@ namespace StajEvrakDogrulama.Services
                 telefonEslesiyor
                     ? "Telefon numarası bulundu ve eşleşiyor."
                     : $"Telefon numarası bulunamadı veya eşleşmiyor. " +
-                      $"PDF: '{pdfTelefon}' | " +
+                      $"Belge: '{pdfTelefon}' | " +
                       $"Veritabanı: '{ogrenci.TelefonNo}'");
 
             // =====================================================
@@ -369,9 +387,9 @@ namespace StajEvrakDogrulama.Services
                 adresEslesiyor
                     ? "İkametgâh adresi bulundu ve eşleşiyor."
                     : string.IsNullOrWhiteSpace(pdfAdres)
-                        ? "İkametgâh adresi PDF içinde boş."
+                        ? "Belgede ikametgâh adresi boş."
                         : $"İkametgâh adresi bulunamadı veya eşleşmiyor. " +
-                          $"PDF: '{pdfAdres}' | " +
+                          $"Belge: '{pdfAdres}' | " +
                           $"Veritabanı: '{ogrenci.IkametgahAdresi}'");
 
             belge.IletisimBilgileriKontrolu =
@@ -559,22 +577,103 @@ namespace StajEvrakDogrulama.Services
         // PDF METNİNİ OKU
         // =========================================================
 
-        private static string PdfMetniniOku(
-            string dosyaYolu)
+        private static string PdfMetniniOku(string dosyaYolu)
         {
-            var sb =
-                new StringBuilder();
+            var sb = new StringBuilder();
 
-            using var document =
-                PdfDocument.Open(dosyaYolu);
+            using var document = PdfDocument.Open(dosyaYolu);
 
             foreach (var sayfa in document.GetPages())
             {
-                sb.AppendLine(
-                    sayfa.Text);
+                sb.AppendLine(sayfa.Text);
             }
 
+            var pdfMetni = sb.ToString();
+
+            // PDF'de seçilebilir metin varsa mevcut sonucu kullan.
+            if (!string.IsNullOrWhiteSpace(pdfMetni))
+            {
+                return pdfMetni;
+            }
+
+            // Metin yoksa taranmış PDF sayfalarını OCR ile oku.
+            var tessdataYolu = Path.Combine(
+                AppContext.BaseDirectory,
+                "tessdata");
+
+            using var engine = new Engine(
+                tessdataYolu,
+                Language.Turkish,
+                EngineMode.Default);
+
+            using var pdfStream = File.OpenRead(dosyaYolu);
+
+            sb.Clear();
+
+            for (var sayfaNo = 0; sayfaNo < document.NumberOfPages; sayfaNo++)
+            {
+                var geciciResimYolu = Path.Combine(
+                    Path.GetTempPath(),
+                    $"{Guid.NewGuid():N}.png");
+
+                try
+                {
+                    pdfStream.Position = 0;
+                    
+                    if(!OperatingSystem.IsWindows())
+                    {
+                        throw new PlatformNotSupportedException("Taranmış PDF OCR şu anda Windows ortamında destekleniyor.");
+                    }
+                    PDFtoImage.Conversion.SavePng(
+                    imageFilename: geciciResimYolu,
+                    pdfStream: pdfStream,
+                    page: sayfaNo);
+
+                    using var image =
+                        TesseractOCR.Pix.Image.LoadFromFile(geciciResimYolu);
+
+                    using var ocrSayfasi = engine.Process(image);
+
+                    sb.AppendLine(ocrSayfasi.Text);
+                }
+                finally
+                {
+                    if (File.Exists(geciciResimYolu))
+                    {
+                        File.Delete(geciciResimYolu);
+                    }
+                }
+            }
+        
+
             return sb.ToString();
+        }
+
+        private static string DocxMetniniOku(string dosyaYolu)
+        {
+            using var document = WordprocessingDocument.Open(dosyaYolu, false);
+
+            return document.MainDocumentPart?.Document?.Body?.InnerText ?? string.Empty;
+        }
+
+        private static string ResimMetniniOku(string dosyaYolu)
+        {
+            var tessdataYolu = Path.Combine(
+                AppContext.BaseDirectory,
+                "tessdata");
+
+            using var engine = new Engine(
+                  tessdataYolu,
+                  Language.Turkish,
+                  EngineMode.Default);
+
+            using var image =
+                TesseractOCR.Pix.Image.LoadFromFile(dosyaYolu);
+
+            using var page = engine.Process(image);
+
+            return page.Text;
+                
         }
 
         // =========================================================
@@ -633,19 +732,7 @@ namespace StajEvrakDogrulama.Services
             {
                 return veritabaniDegeri;
             }
-
-            // Bulunamazsa etiket sonrasındaki alanı arıyoruz.
-            foreach (var etiket in etiketler)
-            {
-                var deger =
-                    EtiketSonrasiDeger(
-                        metin,
-                        etiket,
-                        etiketler);
-
-                if (!string.IsNullOrWhiteSpace(deger))
-                    return deger;
-            }
+            
 
             return string.Empty;
         }

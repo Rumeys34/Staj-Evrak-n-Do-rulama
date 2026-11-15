@@ -66,7 +66,7 @@
                         <thead>
                             <tr>
                                 <th>Ad Soyad</th>
-                                <th>Öğrenci No</th>
+                                <th>Öğrenci ID</th>
                                 <th>Bölüm</th>
                                 <th>Teslim Yılı</th>
                             </tr>
@@ -164,7 +164,7 @@
                         <table class="table table-striped">
                             <thead>
                                 <tr>
-                                    <th>Öğrenci No</th>
+                                    <th>Öğrenci ID</th>
                                     <th>Kullanıcı Adı</th>
                                     <th>Geçici Parola</th>
                                 </tr>
@@ -182,6 +182,48 @@
                         </table>
                     </div>
                 }
+            }
+        </div>
+    </div>
+    <div class="card shadow-sm mb-4">
+        <div class="card-header bg-white">
+            <h2 class="h5 mb-0">
+                Yüklenen Ek-16 Belgeleri (@Model.Belgeler.Count)
+            </h2>
+        </div>
+
+        <div class="card-body">
+            @if (Model.Belgeler.Count == 0)
+            {
+                <p class="text-muted mb-0">Henüz yüklenmiş Ek-16 belgesi yok.</p>
+            }
+            else
+            {
+                <div class="table-responsive">
+                    <table class="table table-striped">
+                        <thead>
+                            <tr>
+                                <th>Öğrenci ID</th>
+                                <th>Dosya</th>
+                                <th>Tür</th>
+                                <th>Yüklenme Tarihi</th>
+                                <th>Durum</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var belge in Model.Belgeler)
+                            {
+                                <tr>
+                                    <td>@belge.OgrenciId</td>
+                                    <td>@belge.DosyaAdi</td>
+                                    <td>@belge.DosyaTuru</td>
+                                    <td>@belge.YuklenmeTarihi.ToString("dd.MM.yyyy HH:mm")</td>
+                                    <td>@belge.Durum</td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
             }
         </div>
     </div>

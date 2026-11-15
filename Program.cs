@@ -60,6 +60,7 @@ using (var scope = app.Services.CreateScope())
 {
     var db = scope.ServiceProvider
         .GetRequiredService<VeritabaniBaglami>();
+        await db.Database.MigrateAsync();
 
     // Admin hesabı yoksa oluştur.
     // Öğrenci bilgileri burada oluşturulmaz veya değiştirilmez.

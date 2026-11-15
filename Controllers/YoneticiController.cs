@@ -68,9 +68,15 @@ namespace StajEvrakDogrulama.Controllers
                 .OrderBy(student => student.AdSoyad)
                 .ToListAsync(cancellationToken);
 
+            var belgeler = await _db.Ek16Belgeler
+                .AsNoTracking()
+                .OrderByDescending(belge => belge.YuklenmeTarihi)
+                .ToListAsync(cancellationToken);
+
             return new AdminDashboardViewModel
             {
-                Students = students
+                Students = students,
+                Belgeler = belgeler
             };
         }
     }
